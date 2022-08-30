@@ -11,6 +11,7 @@ kubectl delete -f https://s3.us-west-2.amazonaws.com/amazon-eks/docs/eks-console
 helm uninstall --namespace karpenter karpenter
 helm uninstall --namespace monitoring prometheus
 helm uninstall --namespace monitoring grafana 
+helm uninstall kubecost --namespace kubecost 
 aws iam delete-role --role-name "${CLUSTER_NAME}-karpenter"
 aws cloudformation delete-stack --stack-name "Karpenter-${CLUSTER_NAME}"
 

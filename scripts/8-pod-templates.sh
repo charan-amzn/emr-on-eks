@@ -12,7 +12,7 @@ spec:
     - name: metrics-files-volume
       emptyDir: {}
   nodeSelector:
-    eks.amazonaws.com/capacityType: ON_DEMAND
+    karpenter.sh/capacity-type: on-demand
   containers:
   - name: spark-kubernetes-driver # This will be interpreted as Spark driver container
 EOF
@@ -31,7 +31,7 @@ spec:
     - name: metrics-files-volume
       emptyDir: {}
   nodeSelector:
-    eks.amazonaws.com/capacityType: ON_DEMAND
+    karpenter.sh/capacity-type: on-demand
   containers:
   - name: spark-kubernetes-executor # This will be interpreted as Spark executor container
 EOF
@@ -48,6 +48,8 @@ spec:
       emptyDir: {}
     - name: metrics-files-volume
       emptyDir: {}
+  nodeSelector:
+    karpenter.sh/capacity-type: spot
   containers:
   - name: spark-kubernetes-executor # This will be interpreted as Spark executor container
 EOF

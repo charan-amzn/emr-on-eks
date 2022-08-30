@@ -39,9 +39,7 @@ curl -fsSL https://karpenter.sh/"${KARPENTER_VERSION}"/getting-started/getting-s
 
 export KARPENTER_IAM_ROLE_ARN="arn:aws:iam::${AWS_ACCOUNT_ID}:role/${CLUSTER_NAME}-karpenter"
 
-aws iam create-service-linked-role --aws-service-name spot.amazonaws.com || true
-# If the role has already been successfully created, you will see:
-# An error occurred (InvalidInput) when calling the CreateServiceLinkedRole operation: Service role name AWSServiceRoleForEC2Spot has been taken in this account, please try a different suffix.
+
 
 #Install Karpenter
 helm repo add karpenter https://charts.karpenter.sh/
@@ -68,11 +66,20 @@ helm repo update
 
 kubectl create namespace monitoring
 
-curl -fsSL https://karpenter.sh/"${KARPENTER_VERSION}"/getting-started/getting-started-with-eksctl/prometheus-values.yaml | tee prometheus-values.yaml
-helm install --namespace monitoring prometheus prometheus-community/prometheus --values prometheus-values.yaml
+eksctl create iamserviceaccount \
+  --name amp-iamproxy-ingest-role \
+  --namespace monitoring \
+  --cluster eks-emr-cluster \
+  --attach-policy-arn arn:aws:iam::aws:policy/AmazonPrometheusRemoteWriteAccess \
+  --approve \
+  --override-existing-serviceaccounts
 
-curl -fsSL https://karpenter.sh/"${KARPENTER_VERSION}"/getting-started/getting-started-with-eksctl/grafana-values.yaml | tee grafana-values.yaml
-helm install --namespace monitoring grafana grafana-charts/grafana --values grafana-values.yaml --set service.type=LoadBalancer --set adminPassword='Amazon@07'
+curl -fsSL https://karpenter.sh/"${KARPENTER_VERSION}"/getting-started/getting-started-with-eksctl/prometheus-values.yaml | tee prometheus-values.yaml
+
+helm install --namespace monitoring prometheus prometheus-community/prometheus --values prometheus-values.yaml --set serviceAccounts.server.name= "amp-iamproxy-ingest-role" --set serviceAccounts.server.create="false" --set serviceAccounts.alertmanager.create="false" --set serviceAccounts.pushgateway.create="false" --set server.remoteWrite[0].url="https://aps-workspaces.${AWS_REGION}.amazonaws.com/workspaces/${WORKSPACE_ID}/api/v1/remote_write" --set server.remoteWrite[0].sigv4.region=${AWS_REGION}
+
+#curl -fsSL https://karpenter.sh/"${KARPENTER_VERSION}"/getting-started/getting-started-with-eksctl/grafana-values.yaml | tee grafana-values.yaml
+#helm install --namespace monitoring grafana grafana-charts/grafana --values grafana-values.yaml --set service.type=LoadBalancer --set adminPassword='Test123'
 
 # Karpenter Provisioner
 
@@ -85,7 +92,7 @@ spec:
   requirements:
     - key: karpenter.sh/capacity-type
       operator: In
-      values: ["spot", "on-demand"]
+      values: ["on-demand","spot"]
   labels:
     intent: emr-job
   providerRef:

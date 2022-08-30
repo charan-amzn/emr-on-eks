@@ -4,7 +4,7 @@ export VIRTUAL_CLUSTER_ID=$(aws emr-containers list-virtual-clusters --query "vi
 
 cat > emr-request-withlogging.json <<EOF 
 {
-    "name": "pi-4",
+    "name": "simple-pi",
     "virtualClusterId": "${VIRTUAL_CLUSTER_ID}",
     "executionRoleArn": "$(aws iam get-role --role-name monthly-submission-JobExecutionRole --query Role.Arn --output text)",
     "releaseLabel": "emr-6.3.0-latest",
