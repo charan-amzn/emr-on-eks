@@ -1,4 +1,5 @@
 # Install Prometheus
+export KARPENTER_VERSION=v0.16.0
 
 #Install Metrics Server 
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
