@@ -27,6 +27,10 @@ aws s3 rb $DEMO_JOBS_PATH --force
 export POD_TEMPLATE_PATH=s3://${CLUSTER_NAME}-pod-templates-${AWS_ACCOUNT_ID}-${AWS_REGION}
 aws s3 rm $POD_TEMPLATE_PATH  --recursive
 aws s3 rb $POD_TEMPLATE_PATH --force
+export POD_TEMPLATE_PATH=s3://${CLUSTER_NAME}-pod-templates-new-${AWS_ACCOUNT_ID}-${AWS_REGION}
+aws s3 rm $POD_TEMPLATE_PATH  --recursive
+aws s3 rb $POD_TEMPLATE_PATH --force
+
 
 
 
